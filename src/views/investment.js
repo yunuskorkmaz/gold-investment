@@ -8,12 +8,11 @@ import {inject, observer} from 'mobx-react';
 import {useFocusEffect} from '@react-navigation/native';
 import SafeAreaView from 'react-native-safe-area-view';
 import Button from '../components/button';
-import {data} from 'react-native-chart-kit/data';
 
 function InvestmentScreen({settingsStore, dataStore}) {
   useFocusEffect(
     React.useCallback(() => {
-      dataStore.getLocal();
+      dataStore.syncData();
     }, [dataStore]),
   );
 
@@ -51,5 +50,4 @@ function InvestmentScreen({settingsStore, dataStore}) {
     </Box>
   );
 }
-
 export default inject('settingsStore', 'dataStore')(observer(InvestmentScreen));

@@ -35,4 +35,4 @@ class SettingsStore {
   }
 }
 
-export default new SettingsStore();
+export default SettingsStore;

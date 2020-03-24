@@ -7,6 +7,10 @@ const colors = {
   primaryText: '#fff',
   secondaryText: '#f1f1f1',
   current: '#2196f3',
+  detailBgUp: 'purple',
+  detailBgDown: 'orange',
+  detailText: '#fff',
+  headerBg: '#141d26',
 };
 
 export default {

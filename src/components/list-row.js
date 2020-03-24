@@ -18,8 +18,8 @@ ListRow.defaultProps = {
   paddingRight: 10,
   paddingTop: 20,
   paddingBottom: 20,
-  borderBottomWidth: '1px',
-  borderBottomColor: 'line',
+  // borderBottomWidth: '1px',
+  // borderBottomColor: 'line',
 };
 
 export default ListRow;
