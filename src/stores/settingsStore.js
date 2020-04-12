@@ -1,38 +1,24 @@
 import {observable, action, autorun, computed} from 'mobx';
-import AsyncStorage from '@react-native-community/async-storage';
+import {persist} from 'mobx-persist';
 class SettingsStore {
-  @observable count = 1;
+  @persist @observable darkMode = false;
 
-  @observable settings = {
-    darkMode: false,
-  };
+  @persist @observable useAws = false;
 
-  @computed get darkMode() {
-    return this.settings.darkMode;
+  @observable currentTab = 'Home';
+
+  @action setUseAws() {
+    this.useAws = !this.useAws;
   }
 
   @action setDarkMode = async () => {
-    if (this.settings.darkMode !== null) {
-      this.settings.darkMode = !this.settings.darkMode;
-    } else {
-      this.settings.darkMode = true;
-    }
-    await AsyncStorage.setItem('settings', JSON.stringify(this.settings));
+    this.darkMode = !this.darkMode;
   };
 
-  constructor() {
-    AsyncStorage.getItem('settings').then(data => {
-      if (data) {
-        this.settings = JSON.parse(data);
-      } else {
-        AsyncStorage.setItem('settings', JSON.stringify(this.settings)).then(
-          a => {
-            this.settings = JSON.parse({darkMode: true});
-          },
-        );
-      }
-    });
+  @action setCurrentTab(tab) {
+    this.currentTab = tab;
   }
+  constructor() {}
 }
 
 export default SettingsStore;

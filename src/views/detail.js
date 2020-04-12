@@ -1,27 +1,36 @@
-import React from 'react';
+import React, {useState} from 'react';
 import Box from '../components/box';
-import SafeAreaView from 'react-native-safe-area-view';
-import {StatusBar, ActivityIndicator, View} from 'react-native';
+import {StatusBar, Dimensions} from 'react-native';
 import Label from '../components/text';
 import Briefcase from '../components/icons/Briefcase';
 import {useTheme} from 'styled-components';
-import {useFocusEffect} from '@react-navigation/native';
+import {LineChart} from 'react-native-chart-kit';
+import ListCell from '../components/list-cell';
+import {FlatList, ScrollView} from 'react-native-gesture-handler';
+import ListRow from '../components/list-row';
+
+import {YellowBox} from 'react-native';
+import {ArrowDown, ArrowUp} from '../components/icons';
+
+YellowBox.ignoreWarnings([
+  'VirtualizedLists should never be nested', // TODO: Remove when fixed
+]);
 
 const DetailScreen = ({navigation, route}) => {
   const item = route.params.item;
   const {colors} = useTheme();
-  const [bgColor, setBgColor] = React.useState(colors.pageBg);
   var colorBg = 'transparent';
-
-  if (item.state === 1) {
+  const [detail, setDetail] = useState({});
+  const [chartData, setChartData] = useState(null);
+  if (item.change_rate > 0) {
     colorBg = colors.detailBgUp;
-  } else if (item.state === 2) {
+  } else if (item.change_rate < 0) {
     colorBg = colors.detailBgDown;
   } else {
-    colorBg = 'blue';
+    colorBg = colors.detailBgStatic;
   }
   navigation.setOptions({
-    title: item.name,
+    title: item.full_name,
     headerTintColor: colors.detailText,
     headerShown: true,
     headerStyle: {
@@ -31,26 +40,55 @@ const DetailScreen = ({navigation, route}) => {
   });
   StatusBar.setTranslucent(true);
   StatusBar.setBackgroundColor('transparent');
-  // useFocusEffect(
-  //   React.useCallback(() => {
-  //     if (item) {
-  //       if (item.state === 1) {
-  //         setBgColor(colors.detailBgUp);
-  //       } else if (item.state === 2) {
-  //         setBgColor(colors.detailBgDown);
-  //       } else {
-  //         setBgColor('blue');
-  //       }
-  //     }
-  //   }, [
-  //     bgColor,
-  //     colors.detailBgDown,
-  //     colors.detailBgUp,
-  //     colors.detailText,
-  //     item,
-  //     navigation,
-  //   ]),
-  // );
+  StatusBar.setBarStyle('light-content');
+
+  const getDetail = async code => {
+    var request = await fetch(
+      `https://finans.apipara.com/json/v9//gold?bank=1&code=${code}&auid=1`,
+      {
+        headers: {token: '_magic'},
+        method: 'get',
+      },
+    );
+    var data = await request.json();
+    var labels = data.response.values.map((a, i) => {
+      if (i % 4 == 0) return a.update_date;
+      return '';
+    });
+    setDetail(data.response);
+    var chartData = data.response.values.map(a => a.buying);
+    setChartData({
+      labels: labels,
+      datasets: [
+        {
+          data: chartData,
+        },
+      ],
+    });
+  };
+
+  React.useEffect(() => {
+    getDetail(item.code);
+  }, [item.code]);
+  const renderItem = ({item}) => {
+    return (
+      <ListRow bg="listItemBg" rippleOpacity={0.05} key={item.bank}>
+        <ListCell
+          color="primaryText"
+          flex={1}
+          fontWeight="600"
+          alignItems="flex-start">
+          {item.bank}
+        </ListCell>
+        <ListCell color="primaryText">{item.buying.toFixed(2)}</ListCell>
+        <ListCell color="primaryText">{item.selling.toFixed(2)}</ListCell>
+      </ListRow>
+    );
+  };
+
+  const sparator = () => {
+    return <Box height={1} flex={1} bg="#CED0CE" />;
+  };
 
   return (
     <Box flex={1} bg={colors.pageBg}>
@@ -58,26 +96,34 @@ const DetailScreen = ({navigation, route}) => {
         <Box flex={1} alignItems="center" justifyContent="center">
           <Label color="detailText">Alış</Label>
           <Box mt="8px" flexDirection="row" alignItems="center">
-            <Briefcase stroke="white" width="20px" height="20px" />
+            {item.change_rate > 0 ? (
+              <ArrowUp stroke="white" width="20px" height="20px" />
+            ) : item.change_rate < 0 ? (
+              <ArrowDown stroke="white" width="20px" height="20px" />
+            ) : null}
             <Label
               fontWeight="bold"
-              ml="10px"
+              ml="5px"
               fontSize="21px"
               color="detailText">
-              {item && item.buy}
+              {item && item.buying.toFixed(2)}
             </Label>
           </Box>
         </Box>
         <Box flex={1} alignItems="center" justifyContent="center">
           <Label color="detailText">Satış</Label>
           <Box mt="8px" flexDirection="row" alignItems="center">
-            <Briefcase stroke="white" width="20px" height="20px" />
+            {item.change_rate > 0 ? (
+              <ArrowUp stroke="white" width="20px" height="20px" />
+            ) : item.change_rate < 0 ? (
+              <ArrowDown stroke="white" width="20px" height="20px" />
+            ) : null}
             <Label
               fontWeight="bold"
-              ml="10px"
+              ml="3px"
               fontSize="21px"
               color="detailText">
-              {item && item.sell}
+              {item && item.selling.toFixed(2)}
             </Label>
           </Box>
         </Box>
@@ -89,14 +135,111 @@ const DetailScreen = ({navigation, route}) => {
               ml="10px"
               fontSize="21px"
               color="detailText">
-              {item && item.diffPercent}
+              {item && '%' + item.change_rate.toFixed(2)}
             </Label>
           </Box>
         </Box>
       </Box>
-      <Box>
-        <Label color="primaryText">{JSON.stringify(item)}</Label>
-      </Box>
+      <ScrollView horizontal={false}>
+        <Box flexDirection="row" my="15px">
+          <Box flex={1} alignItems="center" justifyContent="center">
+            <Label fontSize="12px" color="primaryText">
+              Önceki Kapanış
+            </Label>
+            <Box mt="8px" flexDirection="row" alignItems="center">
+              <Label
+                fontWeight="bold"
+                ml="10px"
+                fontSize="17px"
+                color="primaryText">
+                {item && item.latest.toFixed(2)}
+              </Label>
+            </Box>
+          </Box>
+          <Box alignItems="center" justifyContent="center">
+            <Label fontSize="12px" color="primaryText">
+              Günün En Yüksek Değeri
+            </Label>
+            <Box mt="8px" flexDirection="row" alignItems="center">
+              <Label
+                fontWeight="bold"
+                ml="10px"
+                fontSize="17px"
+                color="primaryText">
+                {item && item.max.toFixed(2)}
+              </Label>
+            </Box>
+          </Box>
+          <Box flex={1} alignItems="center" justifyContent="center">
+            <Label fontSize="12px" color="primaryText">
+              Günün En Düşük Değeri
+            </Label>
+            <Box mt="8px" flexDirection="row" alignItems="center">
+              <Label
+                fontWeight="bold"
+                ml="10px"
+                fontSize="17px"
+                color="primaryText">
+                {item && item.min.toFixed(2)}
+              </Label>
+            </Box>
+          </Box>
+        </Box>
+        <Box>
+          {chartData && (
+            <LineChart
+              data={chartData}
+              width={Dimensions.get('window').width} // from react-native
+              height={220}
+              withInnerLines={false}
+              withOuterLines={false}
+              chartConfig={{
+                backgroundGradientFrom: colors.chartBg,
+                backgroundGradientTo: colors.chartBg,
+                color: (opacity = 1) =>
+                  `rgba(${colors.chartColor}, ${opacity})`,
+                labelColor: (opacity = 1) =>
+                  `rgba(${colors.chartText}, ${opacity})`,
+                propsForDots: {
+                  r: '3',
+                },
+              }}
+            />
+          )}
+        </Box>
+        <FlatList
+          horizontal={false}
+          scrollEnabled={false}
+          nestedScrollEnabled={false}
+          data={detail.banks}
+          renderItem={renderItem}
+          keyExtractor={item => item.bank}
+          ItemSeparatorComponent={sparator}
+          ListHeaderComponent={
+            detail.banks &&
+            detail.banks.length && (
+              <Box
+                flexDirection="row"
+                p={8}
+                borderBottomWidth="1px"
+                borderBottomColor="line">
+                <ListCell
+                  color="secondaryText"
+                  flex={1}
+                  fontSize={12}
+                  alignItems="flex-start"
+                />
+                <ListCell color="secondaryText" fontSize={12}>
+                  Alış
+                </ListCell>
+                <ListCell color="secondaryText" fontSize={12}>
+                  Satış
+                </ListCell>
+              </Box>
+            )
+          }
+        />
+      </ScrollView>
     </Box>
   );
 };

@@ -9,6 +9,40 @@ import SafeAreaView from 'react-native-safe-area-view';
 import Button from '../components/button';
 import AsyncStorage from '@react-native-community/async-storage';
 
+const Title = ({children}) => (
+  <Label
+    p={10}
+    pt={25}
+    color="primaryText"
+    textTransform="uppercase"
+    fontWeight="bold">
+    {children}
+  </Label>
+);
+
+const SwitchSetting = ({name, desc, value, onChange}) => (
+  <Box
+    flexDirection="row"
+    bg="listItemBg"
+    px={10}
+    py={15}
+    borderColor="line"
+    borderTopWidth="1px"
+    borderBottomWidth="1px">
+    <Box flex={1} flexDirection="column">
+      <Label color="primaryText" fontWeight="bold">
+        {name}
+      </Label>
+      <Label fontSize={12} color="#999">
+        {desc}
+      </Label>
+    </Box>
+    <Box alignItems="flex-end" justifyContent="center" width="30%">
+      <Switch onChange={onChange} value={value} />
+    </Box>
+  </Box>
+);
+
 function SettingsScreen({settingsStore: store}) {
   return (
     <Box flex={1} bg="pageBg" as={SafeAreaView}>
@@ -18,37 +52,18 @@ function SettingsScreen({settingsStore: store}) {
           store.darkMode ? darktheme.colors.pageBg : lightheme.colors.listItemBg
         }
       />
-      <Label
-        p={10}
-        pt={25}
-        color="primaryText"
-        textTransform="uppercase"
-        fontWeight="bold">
-        Görünüm Ayarları
-      </Label>
-      <Box
-        flexDirection="row"
-        bg="listItemBg"
-        px={10}
-        py={15}
-        borderColor="line"
-        borderTopWidth="1px"
-        borderBottomWidth="1px">
-        <Box flex={1} flexDirection="column">
-          <Label color="primaryText" fontWeight="bold">
-            Koyu Tema
-          </Label>
-          <Label fontSize={12} color="#999">
-            Koyu temayı aktive et
-          </Label>
-        </Box>
-        <Box alignItems="flex-end" justifyContent="center" width="30%">
-          <Switch
-            onChange={() => store.setDarkMode()}
-            value={store.settings.darkMode}
-          />
-        </Box>
-      </Box>
+      <Title>Görünüm Ayarları</Title>
+      <SwitchSetting
+        name="Koyu Tema"
+        desc="Koyu temayı aktive et"
+        value={store.darkMode}
+        onChange={() => store.setDarkMode()}
+      />
+      <SwitchSetting
+        name="Use AWS"
+        value={store.useAws}
+        onChange={() => store.setUseAws()}
+      />
       <Box
         flexDirection="row"
         bg="listItemBg"
@@ -76,4 +91,4 @@ function SettingsScreen({settingsStore: store}) {
   );
 }
 
-export default inject('settingsStore')(observer(SettingsScreen));
+export default inject('settingsStore', 'gold')(observer(SettingsScreen));

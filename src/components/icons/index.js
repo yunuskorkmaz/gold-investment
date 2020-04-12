@@ -1,3 +1,6 @@
+export { default as ArrowDown } from './ArrowDown'
+export { default as ArrowUp } from './ArrowUp'
 export { default as BarChart } from './BarChart'
 export { default as Briefcase } from './Briefcase'
+export { default as Plus } from './Plus'
 export { default as SettingsIcon } from './SettingsIcon'

@@ -1,15 +1,13 @@
 import React from 'react';
-import {Text} from 'react-native';
 import {BarChart, Briefcase} from './icons';
 import Box from './box';
 import Ripple from 'react-native-material-ripple';
 import Label from './text';
 import {inject, observer} from 'mobx-react';
-import theme from '../utils/theme';
-import darktheme from '../utils/darktheme';
-import lightheme from '../utils/lightheme';
+import {useTheme} from 'styled-components';
 
 function TabBar({state, descriptors, navigation, settingsStore}) {
+  const {colors} = useTheme();
   return (
     <Box flexDirection={'row'}>
       {state.routes.map((route, index) => {
@@ -17,7 +15,7 @@ function TabBar({state, descriptors, navigation, settingsStore}) {
         const label = options.title || route.name;
 
         const isFocused = state.index === index;
-
+        isFocused && settingsStore.setCurrentTab(route.name);
         const onPress = () => {
           const event = navigation.emit({
             type: 'tabPress',
@@ -28,12 +26,8 @@ function TabBar({state, descriptors, navigation, settingsStore}) {
             navigation.navigate(route.name);
           }
         };
-        const iconIsFocusColor = settingsStore.darkMode
-          ? darktheme.colors.current
-          : lightheme.colors.current;
-        const iconColor = settingsStore.darkMode
-          ? darktheme.colors.secondaryText
-          : lightheme.colors.secondaryText;
+        const iconIsFocusColor = colors.current;
+        const iconColor = colors.secondaryText;
         return (
           <Box
             as={Ripple}
@@ -56,10 +50,8 @@ function TabBar({state, descriptors, navigation, settingsStore}) {
             )}
             <Label
               color={isFocused ? 'current' : 'primaryText'}
-              style={{
-                fontSize: 11,
-                paddingTop: 4,
-              }}>
+              fontSize="11px"
+              pt={4}>
               {label}
             </Label>
           </Box>

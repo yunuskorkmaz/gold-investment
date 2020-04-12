@@ -8,6 +8,8 @@ import {
   flexbox,
   border,
   boxShadow,
+  borderWidth,
+  borderColor,
 } from 'styled-system';
 
 const Box = styled(View)(
@@ -18,6 +20,8 @@ const Box = styled(View)(
     flexbox,
     border,
     boxShadow,
+    borderWidth,
+    borderColor,
   ),
 );
 

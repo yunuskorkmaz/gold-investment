@@ -1,20 +1,17 @@
 import React from 'react';
-import {FlatList, ToastAndroid, StatusBar, View} from 'react-native';
-import AsyncStorage from '@react-native-community/async-storage';
+import {FlatList, StatusBar, View} from 'react-native';
 import Box from '../components/box';
 import ListRow from '../components/list-row';
 import ListCell from '../components/list-cell';
 import SafeAreaView from 'react-native-safe-area-view';
 import {inject, observer} from 'mobx-react';
 import {useFocusEffect} from '@react-navigation/native';
-import darktheme from '../utils/darktheme';
-import lightheme from '../utils/lightheme';
-import moment from 'moment-timezone';
+
 import {useTheme} from 'styled-components';
 
-function MarketScreen({navigation, settingsStore, dataStore}) {
+function MainMarketScreen({navigation, settingsStore, dataStore, gold}) {
   const [state, setState] = React.useState([]);
-  const [refreshing, setRefreshing] = React.useState(false);
+  const [refreshing] = React.useState(false);
   const {colors} = useTheme();
   useFocusEffect(
     React.useCallback(() => {
@@ -22,39 +19,40 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
       StatusBar.setBarStyle(
         settingsStore.darkMode ? 'light-content' : 'dark-content',
       );
-      dataStore.syncData();
-    }, [colors.pageBg, dataStore, settingsStore.darkMode]),
+      //   dataStore.syncData();
+      gold.fetchData();
+    }, [colors.pageBg, gold, settingsStore.darkMode]),
   );
 
   React.useEffect(() => {
     setState([
-      {
-        name: 'Test düşüş',
-        buy: '100',
-        sell: '100',
-        diff: '0',
-        diffPercent: '100%',
-        state: 2,
-      },
-      {
-        name: 'Test yükseliş',
-        buy: '100',
-        sell: '100',
-        diff: '0',
-        diffPercent: '100%',
-        state: 1,
-      },
-      {
-        name: 'Test static',
-        buy: '100',
-        sell: '100',
-        diff: '0',
-        diffPercent: '100%',
-        state: 0,
-      },
-      ...dataStore.liveData.data,
+      // {
+      //   name: 'Test düşüş',
+      //   buy: '100',
+      //   sell: '100',
+      //   diff: '0',
+      //   diffPercent: '100%',
+      //   state: 2,
+      // },
+      // {
+      //   name: 'Test yükseliş',
+      //   buy: '100',
+      //   sell: '100',
+      //   diff: '0',
+      //   diffPercent: '100%',
+      //   state: 1,
+      // },
+      // {
+      //   name: 'Test static',
+      //   buy: '100',
+      //   sell: '100',
+      //   diff: '0',
+      //   diffPercent: '100%',
+      //   state: 0,
+      // },
+      ...gold.data,
     ]);
-  }, [dataStore.liveData.data]);
+  }, [gold.data]);
 
   const onRefreshing = async () => {
     await dataStore.syncData();
@@ -62,9 +60,9 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
 
   const renderItem = ({item}) => {
     var color = 'primaryText';
-    if (item.state === 1) {
-      color = '#8FCF50';
-    } else if (item.state === 2) {
+    if (item.change_rate > 0) {
+      color = '#54a17e';
+    } else if (item.change_rate < 0) {
       color = '#E75D5C';
     }
     return (
@@ -78,11 +76,11 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
           flex={1}
           fontWeight="600"
           alignItems="flex-start">
-          {item.name}
+          {item.full_name}
         </ListCell>
-        <ListCell color={color}>{item.buy}</ListCell>
-        <ListCell color={color}>{item.sell}</ListCell>
-        <ListCell color={color}>{item.diffPercent}</ListCell>
+        <ListCell color={color}>{item.buying.toFixed(2)}</ListCell>
+        <ListCell color={color}>{item.selling.toFixed(2)}</ListCell>
+        <ListCell color={color}>%{item.change_rate.toFixed(2)}</ListCell>
       </ListRow>
     );
   };
@@ -90,6 +88,7 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
   const sparator = () => {
     return (
       <View
+        // eslint-disable-next-line react-native/no-inline-styles
         style={{
           height: 1,
           flex: 1,
@@ -112,10 +111,7 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
           flex={1}
           fontSize={12}
           alignItems="flex-start">
-          Güncelleme :{' '}
-          {moment(dataStore.liveData.date)
-            .tz('Europe/Istanbul')
-            .format('HH:mm')}
+          Güncelleme : {gold.time}
         </ListCell>
         <ListCell color="secondaryText" fontSize={12}>
           Alış
@@ -128,7 +124,7 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
         </ListCell>
       </Box>
       <FlatList
-        onRefresh={() => dataStore.syncData()}
+        onRefresh={() => gold.fetchData()}
         refreshing={refreshing}
         data={state}
         renderItem={renderItem}
@@ -139,5 +135,5 @@ function MarketScreen({navigation, settingsStore, dataStore}) {
   );
 }
 
-const stores = ['dataStore', 'settingsStore'];
-export default inject(...stores)(observer(MarketScreen));
+const stores = ['dataStore', 'settingsStore', 'gold'];
+export default inject(...stores)(observer(MainMarketScreen));

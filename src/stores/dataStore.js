@@ -2,15 +2,14 @@ import {observable, action, autorun, computed} from 'mobx';
 import {ToastAndroid} from 'react-native';
 import AsyncStorage from '@react-native-community/async-storage';
 import moment from 'moment-timezone';
+import {persist} from 'mobx-persist';
 
 const ErrorToast = message => {
   ToastAndroid.show('Hata Oluştu...', ToastAndroid.SHORT);
 };
 
 class DataStore {
-  @observable liveData = [];
-
-  @observable test = {};
+  @persist('object') @observable liveData = {data: [], date: ''};
 
   fetchData = async () => {
     const response = await fetch(
@@ -20,66 +19,28 @@ class DataStore {
     return data;
   };
 
-  syncData = async () => {
-    console.log('start sync :::::::::::::::::::::::::::::::::::::::::');
-    var localData = await AsyncStorage.getItem('liveData');
-    var localDataJson = JSON.parse(localData);
-    if (localData && localDataJson.hasOwnProperty('data')) {
-      console.log('local data');
-      localData = JSON.parse(localData);
+  async syncData() {
+    if (this.liveData.data === [] || this.liveData.date === '') {
+      this.liveData = await this.fetchData();
+    } else {
       var currentDate = moment()
         .tz('Europe/Istanbul')
         .format();
-      var localdate = moment(localData.date)
+      var localeDate = moment(this.liveData.date)
         .tz('Europe/Istanbul')
         .format();
-      var diff = moment(localdate).diff(currentDate, 'minutes');
-      if (Math.abs(diff) > 15) {
-        console.log('date > 2');
+      var diff = moment(localeDate).diff(currentDate, 'minutes');
+      if (Math.abs(diff) > 10) {
         try {
-          var responser = await this.fetchData();
-          await this.setLiveData(responser);
+          this.liveData = await this.fetchData();
         } catch (e) {
           ErrorToast();
         }
-      } else {
-        console.log('data < 2');
-        this.setLiveData(localData);
       }
-    } else {
-      console.log('not local data');
-      try {
-        var response = await this.fetchData();
-        await this.setLiveData(response);
-      } catch (e) {
-        ErrorToast();
-      }
-    }
-  };
-
-  @action setLiveData = async data => {
-    await AsyncStorage.setItem('liveData', JSON.stringify(data), async err => {
-      if (!err) {
-        console.log('set variable');
-        this.liveData = JSON.parse(await AsyncStorage.getItem('liveData'));
-      }
-    });
-  };
-
-  @action setClear = async () => {
-    await AsyncStorage.removeItem('liveData');
-    this.liveData = {};
-  };
-
-  async setCtorLocalData() {
-    var localData = await AsyncStorage.getItem('liveData');
-    if (localData && localData.hasOwnProperty('data')) {
-      this.setLiveData(JSON.parse(localData));
     }
   }
 
   constructor() {
-    this.setCtorLocalData();
     this.syncData();
   }
 }

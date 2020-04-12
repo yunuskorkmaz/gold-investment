@@ -12,8 +12,10 @@ import TabBar from './components/tab-bar';
 import {useTheme} from 'styled-components';
 import HeaderRight from './components/header-right';
 import DetailScreen from './views/detail';
+import AddInvestment from './views/addInvestment';
 const AppStack = createStackNavigator();
 const TabStack = createBottomTabNavigator();
+
 function TabScreen() {
   return (
     <TabStack.Navigator tabBar={props => <TabBar {...props} />}>
@@ -33,6 +35,8 @@ function TabScreen() {
   );
 }
 
+// const TabNavigation = inject(...['settingsStore'])(observer(TabScreen));
+
 function Navigation() {
   const {colors} = useTheme();
   const headerStyle = {
@@ -47,13 +51,14 @@ function Navigation() {
       <AppStack.Navigator
         screenOptions={{
           cardStyleInterpolator: CardStyleInterpolators.forHorizontalIOS,
+          animationEnabled: true,
         }}>
         <AppStack.Screen
           name={'Home'}
           component={TabScreen}
           options={{
             ...headerStyle,
-            headerRight: () => <HeaderRight />,
+            headerRight: props => <HeaderRight {...props} />,
             title: 'Altın Hesabı',
           }}
         />
@@ -66,6 +71,11 @@ function Navigation() {
           name={'Detail'}
           component={DetailScreen}
           options={{...headerStyle, title: 'Detail'}}
+        />
+        <AppStack.Screen
+          name={'AddInvestment'}
+          component={AddInvestment}
+          options={{...headerStyle, title: 'Yatırımlarım'}}
         />
       </AppStack.Navigator>
     </NavigationContainer>
