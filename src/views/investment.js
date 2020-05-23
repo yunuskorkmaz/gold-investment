@@ -16,6 +16,7 @@ import moment from 'moment-timezone';
 import {Threedots, SettingsIcon} from '../components/icons';
 import {useTheme} from 'styled-components';
 import OptionPopup from '../components/OptionPopup';
+import InvestmentHeader from '../components/investmentHeader';
 
 function InvestmentScreen({navigation, gold}) {
   const {colors} = useTheme();
@@ -42,31 +43,12 @@ function InvestmentScreen({navigation, gold}) {
   };
 
   return (
-    <Box flex={1} bg="pageBg">
-      <Box
-        bg="listItemBg"
-        p={10}
-        mb={15}
-        flexDirection="column"
-        alignItems="center">
-        <Label>Bakiye</Label>
-        <Label fontSize={19}>₺{gold.totalValue.toFixed(2)}</Label>
-        <Label>Kar/Zarar</Label>
-        <Label
-          fontSize={18}
-          p={5}
-          bg={gold.totalGain <= 0 ? 'red' : 'green'}
-          m={2}>
-          ₺{Math.abs(gold.totalGain.toFixed(2))}
-        </Label>
-        <Label
-          fontSize={18}
-          p={5}
-          bg={gold.totalGain <= 0 ? 'red' : 'green'}
-          m={2}>
-          %{gold.totalPercentGain}
-        </Label>
-      </Box>
+    <Box flex={1} bg="pageBg" padding={10}>
+      <InvestmentHeader
+        totalGain={gold.totalGain}
+        totalPercentGain={gold.totalPercentGain}
+        totalValue={gold.totalValue}
+      />
 
       <FlatList
         keyExtractor={item => item.date.toString()}
@@ -76,7 +58,7 @@ function InvestmentScreen({navigation, gold}) {
           var value = data.selling.toFixed(2);
           var diff = parseFloat(data.selling) - parseFloat(item.price);
           return (
-            <Box bg="listItemBg" p={10} ml={10} mr={10} mb={15}>
+            <Box bg="listItemBg" p={10} marginVertical={6}>
               <Box mb={5} flexDirection="row">
                 <Box width="55%">
                   <Label fontSize={17}>{data.full_name}</Label>

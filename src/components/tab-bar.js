@@ -9,7 +9,11 @@ import {useTheme} from 'styled-components';
 function TabBar({state, descriptors, navigation, settingsStore}) {
   const {colors} = useTheme();
   return (
-    <Box flexDirection={'row'}>
+    <Box
+      flexDirection={'row'}
+      bg="headerBg"
+      borderTopWidth="1px"
+      borderTopColor="line">
       {state.routes.map((route, index) => {
         const {options} = descriptors[route.key];
         const label = options.title || route.name;
@@ -38,9 +42,6 @@ function TabBar({state, descriptors, navigation, settingsStore}) {
             flexDirection={'column'}
             justifyContent="center"
             alignItems="center"
-            bg="listItemBg"
-            borderTopWidth="1px"
-            borderTopColor="line"
             onPress={onPress}>
             {route.name === 'Markets' && (
               <BarChart stroke={isFocused ? iconIsFocusColor : iconColor} />
