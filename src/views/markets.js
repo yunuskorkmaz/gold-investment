@@ -13,6 +13,7 @@ function MainMarketScreen({navigation, settingsStore, dataStore, gold}) {
   const [state, setState] = React.useState([]);
   const [refreshing] = React.useState(false);
   const {colors} = useTheme();
+  StatusBar.setTranslucent(true);
   useFocusEffect(
     React.useCallback(() => {
       StatusBar.setBackgroundColor(colors.pageBg);

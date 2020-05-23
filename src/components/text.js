@@ -1,3 +1,4 @@
+import React from 'react';
 import {Text} from 'react-native';
 import styled from 'styled-components';
 import {
@@ -20,5 +21,7 @@ const Label = styled(Text)(
     typography,
   ),
 );
-
+Label.defaultProps = {
+  color: 'primaryText',
+};
 export default Label;

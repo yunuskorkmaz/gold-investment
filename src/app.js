@@ -23,6 +23,7 @@ const stores = {
 
 hydrate('setting', stores.settingsStore);
 hydrate('data', stores.dataStore);
+hydrate('gold', stores.gold);
 
 function MainComponent({settingsStore: store}) {
   return (

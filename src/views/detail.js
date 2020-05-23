@@ -39,8 +39,6 @@ const DetailScreen = ({navigation, route}) => {
     },
   });
   StatusBar.setTranslucent(true);
-  StatusBar.setBackgroundColor('transparent');
-  StatusBar.setBarStyle('light-content');
 
   const getDetail = async code => {
     var request = await fetch(
@@ -69,10 +67,19 @@ const DetailScreen = ({navigation, route}) => {
 
   React.useEffect(() => {
     getDetail(item.code);
+    StatusBar.setBarStyle('light-content');
+    StatusBar.setBackgroundColor('transparent');
   }, [item.code]);
+
   const renderItem = ({item}) => {
     return (
-      <ListRow bg="listItemBg" rippleOpacity={0.05} key={item.bank}>
+      <ListRow
+        borderBottomColor="#999"
+        borderBottomWidth={1}
+        mb={1}
+        bg="listItemBg"
+        rippleOpacity={0.05}
+        key={item.bank}>
         <ListCell
           color="primaryText"
           flex={1}
@@ -84,10 +91,6 @@ const DetailScreen = ({navigation, route}) => {
         <ListCell color="primaryText">{item.selling.toFixed(2)}</ListCell>
       </ListRow>
     );
-  };
-
-  const sparator = () => {
-    return <Box height={1} flex={1} bg="#CED0CE" />;
   };
 
   return (
@@ -214,7 +217,6 @@ const DetailScreen = ({navigation, route}) => {
           data={detail.banks}
           renderItem={renderItem}
           keyExtractor={item => item.bank}
-          ItemSeparatorComponent={sparator}
           ListHeaderComponent={
             detail.banks &&
             detail.banks.length && (
