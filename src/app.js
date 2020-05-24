@@ -1,48 +1,63 @@
 import 'react-native-gesture-handler';
 import React from 'react';
-import {ThemeProvider} from 'styled-components';
-import {Provider} from 'mobx-react';
-import light from './utils/lightheme';
-import dark from './utils/darktheme';
-import settingsStore from './stores/settingsStore';
-import dataStore from './stores/dataStore';
-import {inject, observer} from 'mobx-react';
-import {SafeAreaProvider} from 'react-native-safe-area-context';
-import Navigation from './navigation';
-import {create} from 'mobx-persist';
-import AsyncStorage from '@react-native-community/async-storage';
-import {GoldStore} from './stores/goldStore';
+import {
+  createStackNavigator,
+  CardStyleInterpolators,
+} from '@react-navigation/stack';
+import {createBottomTabNavigator} from '@react-navigation/bottom-tabs';
+import Markets from './pages/markets';
+import Investment from './pages/investments';
+import {NavigationContainer} from '@react-navigation/native';
+import {
+  ApplicationProvider,
+  BottomNavigation,
+  BottomNavigationTab,
+  Text,
+  IconRegistry,
+} from '@ui-kitten/components';
+import * as eva from '@eva-design/eva';
+import {EvaIconsPack} from '@ui-kitten/eva-icons';
 
-var hydrate = create({storage: AsyncStorage});
+const AppStack = createStackNavigator();
+const TabStack = createBottomTabNavigator();
 
-const stores = {
-  settingsStore: new settingsStore(),
-  dataStore: new dataStore(),
-  gold: new GoldStore(),
+const BottomTabBar = ({navigation, state}) => (
+  <BottomNavigation
+    selectedIndex={state.index}
+    onSelect={index => navigation.navigate(state.routeNames[index])}>
+    <BottomNavigationTab title="USERS" />
+    <BottomNavigationTab title="ORDERS" />
+  </BottomNavigation>
+);
+
+const TabNavigator = () => {
+  return (
+    <TabStack.Navigator tabBar={props => <BottomTabBar {...props} />}>
+      <TabStack.Screen name="Markets" component={Markets} />
+      <TabStack.Screen name="Investments" component={Investment} />
+    </TabStack.Navigator>
+  );
 };
 
-hydrate('setting', stores.settingsStore);
-hydrate('data', stores.dataStore);
-hydrate('gold', stores.gold);
-
-function MainComponent({settingsStore: store}) {
+const AppNavigator = () => {
   return (
-    <ThemeProvider theme={store.darkMode ? dark : light}>
-      <Navigation />
-    </ThemeProvider>
+    <AppStack.Navigator headerMode="none">
+      <AppStack.Screen name="Home" component={TabNavigator} />
+      <AppStack.Screen name="Detail" component={() => <Text>asd</Text>} />
+      <AppStack.Screen name="Settings" component={Investment} />
+    </AppStack.Navigator>
   );
-}
+};
 
-const Main = inject('settingsStore')(observer(MainComponent));
-
-function App() {
+const App = () => {
   return (
-    <SafeAreaProvider>
-      <Provider {...stores}>
-        <Main />
-      </Provider>
-    </SafeAreaProvider>
+    <NavigationContainer>
+      <IconRegistry icons={EvaIconsPack} />
+      <ApplicationProvider {...eva} theme={eva.light}>
+        <AppNavigator />
+      </ApplicationProvider>
+    </NavigationContainer>
   );
-}
+};
 
 export default App;

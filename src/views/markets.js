@@ -79,8 +79,8 @@ function MainMarketScreen({navigation, settingsStore, dataStore, gold}) {
           alignItems="flex-start">
           {item.full_name}
         </ListCell>
-        <ListCell color={color}>{item.buying.toFixed(2)}</ListCell>
-        <ListCell color={color}>{item.selling.toFixed(2)}</ListCell>
+        <ListCell color={color}>{item.buying.toFixed(2)} </ListCell>
+        <ListCell color={color}>{item.selling.toFixed(2)} </ListCell>
         <ListCell color={color}>%{item.change_rate.toFixed(2)}</ListCell>
       </ListRow>
     );
